@@ -20,9 +20,9 @@ namespace gameslist_2._2.Services
                                                            (x.Price < priceMax));
         }
 
-        public List<string> GetGenresByGame(Game game)
+        public List<Genre> GetGenresByGame(int id)
         {
-            return game.Genres;
+            return DataSource.Games.First(x => x.ID == id).Genres;
         }
 
         public List<string> GetUniqueCategories(IEnumerable<Game> games)
@@ -35,13 +35,23 @@ namespace gameslist_2._2.Services
                     Categories.Add(game.Category);
                 }
             }
+            
             return Categories;
         }
 
-        public List<Game> FilterGames(string FilterCategory, string FilterGenre)
+        public List<Game> FilterGames(string filterCategory, List<string> filterGenre) 
         {
-            return (List<Game>)DataSource.Games.Where(x => (x.Category == FilterCategory) &&
-                                                           (x.Genres.Contains(FilterGenre)));
+            var filteredList = DataSource.Games.Where(x => x.Category == filterCategory &&
+                                                           x.Genres.Any(y => filterGenre.Contains(y.Name)));
+         
+            return filteredList.ToList();
+        }
+        public List<Game> Pagination(int page, int pageSize = 5)
+        {
+            return DataSource.Games
+                .Skip(page - 1 >= 0 ? page * pageSize : 0)
+                .Take(pageSize)
+                .ToList();
         }
     }
 }
